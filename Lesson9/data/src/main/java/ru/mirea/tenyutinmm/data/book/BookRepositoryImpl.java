@@ -5,39 +5,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import ru.mirea.tenyutinmm.data.database.AppDatabase;
-import ru.mirea.tenyutinmm.data.database.BookDao;
-import ru.mirea.tenyutinmm.data.database.BookEntity;
 import ru.mirea.tenyutinmm.domain.book.Book;
 import ru.mirea.tenyutinmm.domain.book.BookRepository;
 
 public class BookRepositoryImpl implements BookRepository {
-    private final BookDao bookDao;
-    private final ExecutorService databaseExecutor = Executors.newSingleThreadExecutor();
+
+    // --- ЗАГЛУШКА ДАННЫХ (STUB) ---
+    private final ArrayList<Book> favoriteBooks = new ArrayList<>();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public BookRepositoryImpl(Context context) {
-        AppDatabase db = AppDatabase.getDatabase(context);
-        this.bookDao = db.bookDao();
+        // Начальные данные для заглушки
+        favoriteBooks.add(new Book("Мастер и Маргарита"));
+        favoriteBooks.add(new Book("Дюна"));
+        favoriteBooks.add(new Book("1984"));
     }
 
     @Override
     public void saveBook(Book book) {
-        databaseExecutor.execute(() -> {
-            BookEntity bookEntity = new BookEntity();
-            bookEntity.title = book.title;
-            bookDao.insert(bookEntity);
+        // Эмулируем асинхронную работу, как будто сохраняем в базу
+        executor.execute(() -> {
+            favoriteBooks.add(0, book);
         });
     }
 
     @Override
     public void getAllBooks(BookCallback callback) {
-        databaseExecutor.execute(() -> {
-            List<BookEntity> entities = bookDao.getAllBooks();
-            List<Book> books = new ArrayList<>();
-            for (BookEntity entity : entities) {
-                books.add(new Book(entity.title));
-            }
-            callback.onBooksLoaded(books);
+        // Эмулируем асинхронную работу, как будто читаем из базы
+        executor.execute(() -> {
+            // Возвращаем копию списка, чтобы избежать проблем с многопоточностью
+            callback.onBooksLoaded(new ArrayList<>(favoriteBooks));
         });
     }
 }

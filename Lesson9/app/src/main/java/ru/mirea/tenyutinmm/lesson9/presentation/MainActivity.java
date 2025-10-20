@@ -32,24 +32,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final NavigationBarView.OnItemSelectedListener navListener =
-            new NavigationBarView.OnItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Fragment selectedFragment = null;
-                    int itemId = item.getItemId();
+            item -> {
+                Fragment selectedFragment = null;
+                int itemId = item.getItemId();
 
-                    if (itemId == R.id.navigation_weather) {
-                        selectedFragment = new WeatherFragment();
-                    } else if (itemId == R.id.navigation_cats) {
-                        selectedFragment = new CatsFragment();
-                    } else if (itemId == R.id.navigation_books) {
-                        selectedFragment = new BooksFragment();
-                    }
-
-                    if (selectedFragment != null) {
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
-                    }
-                    return true;
+                if (itemId == R.id.navigation_weather) {
+                    selectedFragment = new WeatherFragment();
+                } else if (itemId == R.id.navigation_cats) {
+                    selectedFragment = new CatsFragment();
+                } else if (itemId == R.id.navigation_books) {
+                    selectedFragment = new BooksFragment();
                 }
+                else if (itemId == R.id.navigation_scrollview) {
+                    selectedFragment = new ScrollViewFragment();
+                } else if (itemId == R.id.navigation_listview) {
+                    selectedFragment = new ListViewFragment();
+                }
+
+                if (selectedFragment != null) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+                }
+                return true;
             };
 }

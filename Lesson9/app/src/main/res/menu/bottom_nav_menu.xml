@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/navigation_weather"
@@ -11,4 +12,12 @@
         android:id="@+id/navigation_books"
         android:icon="@android:drawable/ic_menu_edit"
         android:title="Книги" />
+    <item
+        android:id="@+id/navigation_scrollview"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="Прогрессия" />
+    <item
+        android:id="@+id/navigation_listview"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Авторы" />
 </menu>
