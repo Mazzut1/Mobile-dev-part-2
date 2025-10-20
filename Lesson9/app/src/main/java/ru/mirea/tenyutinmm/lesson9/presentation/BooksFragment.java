@@ -10,17 +10,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.List;
-import ru.mirea.tenyutinmm.data.book.BookRepositoryImpl;
-import ru.mirea.tenyutinmm.domain.book.Book;
-import ru.mirea.tenyutinmm.domain.book.BookRepository;
 import ru.mirea.tenyutinmm.lesson9.R;
 
 public class BooksFragment extends Fragment {
 
-    private BookRepository bookRepository;
+    private BooksViewModel viewModel;
     private RecyclerView recyclerView;
     private BookAdapter bookAdapter;
     private EditText bookTitleEditText;
@@ -36,7 +33,8 @@ public class BooksFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        bookRepository = new BookRepositoryImpl(getContext());
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(requireContext()))
+                .get(BooksViewModel.class);
 
         recyclerView = view.findViewById(R.id.rv_books);
         bookTitleEditText = view.findViewById(R.id.et_book_title);
@@ -45,31 +43,22 @@ public class BooksFragment extends Fragment {
         setupRecyclerView();
 
         saveButton.setOnClickListener(v -> {
-            String title = bookTitleEditText.getText().toString().trim();
-            if (!title.isEmpty()) {
-                bookRepository.saveBook(new Book(title));
-                bookTitleEditText.setText("");
-                loadBooks();
-                Toast.makeText(getContext(), "Книга сохранена", Toast.LENGTH_SHORT).show();
-            }
+            String title = bookTitleEditText.getText().toString();
+            viewModel.saveBook(title);
+            bookTitleEditText.setText("");
+            Toast.makeText(getContext(), "Книга сохранена", Toast.LENGTH_SHORT).show();
         });
 
-        loadBooks();
+        viewModel.booksLiveData.observe(getViewLifecycleOwner(), books -> {
+            bookAdapter.setBooks(books);
+        });
+
+        viewModel.loadBooks();
     }
 
     private void setupRecyclerView() {
         bookAdapter = new BookAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(bookAdapter);
-    }
-
-    private void loadBooks() {
-        bookRepository.getAllBooks(books -> {
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    bookAdapter.setBooks(books);
-                });
-            }
-        });
     }
 }

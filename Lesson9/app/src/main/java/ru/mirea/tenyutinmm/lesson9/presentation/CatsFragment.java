@@ -11,21 +11,18 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
-import java.util.List;
-import ru.mirea.tenyutinmm.data.cat.CatRepositoryImpl;
-import ru.mirea.tenyutinmm.domain.cat.Cat;
-import ru.mirea.tenyutinmm.domain.cat.CatRepository;
 import ru.mirea.tenyutinmm.lesson9.R;
 
 public class CatsFragment extends Fragment {
 
+    private CatsViewModel viewModel;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private Button logoutButton;
     private CatAdapter catAdapter;
-    private CatRepository catRepository;
 
     @Nullable
     @Override
@@ -37,23 +34,38 @@ public class CatsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(requireContext()))
+                .get(CatsViewModel.class);
+
         recyclerView = view.findViewById(R.id.rv_cats);
         progressBar = view.findViewById(R.id.progressBar);
         logoutButton = view.findViewById(R.id.btn_logout);
 
-        MainActivity activity = (MainActivity) getActivity();
-        boolean isGuest = activity != null && activity.isGuest;
+        setupRecyclerView();
 
-        if (!isGuest) {
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null && !activity.isGuest) {
             logoutButton.setVisibility(View.VISIBLE);
             logoutButton.setOnClickListener(v -> logout());
         } else {
             logoutButton.setVisibility(View.GONE);
         }
 
-        catRepository = new CatRepositoryImpl(getContext());
-        setupRecyclerView();
-        loadCats();
+        viewModel.getCatsLiveData().observe(getViewLifecycleOwner(), cats -> {
+            catAdapter.setCats(cats);
+        });
+
+        viewModel.isLoading.observe(getViewLifecycleOwner(), isLoading -> {
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
+
+        viewModel.error.observe(getViewLifecycleOwner(), error -> {
+            if(error != null) Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+        });
+
+        if (viewModel.getCatsLiveData().getValue() == null) {
+            viewModel.loadCats();
+        }
     }
 
     private void logout() {
@@ -70,28 +82,5 @@ public class CatsFragment extends Fragment {
             startActivity(intent);
         });
         recyclerView.setAdapter(catAdapter);
-    }
-
-    private void loadCats() {
-        progressBar.setVisibility(View.VISIBLE);
-        new Thread(() -> catRepository.getCats(new CatRepository.CatsCallback() {
-            @Override
-            public void onSuccess(List<Cat> cats) {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(() -> {
-                    progressBar.setVisibility(View.GONE);
-                    catAdapter.setCats(cats);
-                });
-            }
-
-            @Override
-            public void onError(String message) {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(() -> {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                });
-            }
-        })).start();
     }
 }

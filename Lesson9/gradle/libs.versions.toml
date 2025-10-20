@@ -12,10 +12,9 @@ googleGmsGoogleServices = "4.4.2"
 retrofit = "2.9.0"
 room = "2.6.1"
 glide = "4.16.0"
-# --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
-# Меняем версию и название для новой библиотеки
 tensorflowLiteTaskVision = "0.4.4"
-
+# ---- НОВЫЕ ВЕРСИИ ----
+lifecycle = "2.8.1"
 
 [libraries]
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -30,13 +29,10 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
-# --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
-# Удаляем старые, неправильные библиотеки
-# tensorflow-lite-support = ...
-# tensorflow-lite-gpu = ...
-# Добавляем одну новую, правильную библиотеку, которая содержит всё необходимое
 tensorflow-lite-task-vision = { group = "org.tensorflow", name = "tensorflow-lite-task-vision", version.ref = "tensorflowLiteTaskVision" }
-
+# ---- НОВЫЕ БИБЛИОТЕКИ ----
+lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycle" }
+lifecycle-livedata = { group = "androidx.lifecycle", name = "lifecycle-livedata", version.ref = "lifecycle" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidApplication" }

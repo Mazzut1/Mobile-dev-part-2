@@ -10,16 +10,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import ru.mirea.tenyutinmm.data.weather.WeatherRepositoryImpl;
-import ru.mirea.tenyutinmm.domain.weather.Weather;
-import ru.mirea.tenyutinmm.domain.weather.WeatherRepository;
+import androidx.lifecycle.ViewModelProvider;
 import ru.mirea.tenyutinmm.lesson9.R;
 
 public class WeatherFragment extends Fragment {
 
+    private WeatherViewModel viewModel;
     private TextView temperatureTextView, descriptionTextView;
     private ProgressBar progressBar;
-    private WeatherRepository weatherRepository;
 
     @Nullable
     @Override
@@ -31,35 +29,26 @@ public class WeatherFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(requireContext()))
+                .get(WeatherViewModel.class);
+
         temperatureTextView = view.findViewById(R.id.tv_temperature);
         descriptionTextView = view.findViewById(R.id.tv_description);
         progressBar = view.findViewById(R.id.progressBar);
 
-        weatherRepository = new WeatherRepositoryImpl();
-        loadWeather();
-    }
-
-    private void loadWeather() {
-        progressBar.setVisibility(View.VISIBLE);
-        weatherRepository.getWeather("Moscow", new WeatherRepository.WeatherCallback() {
-            @Override
-            public void onSuccess(Weather weather) {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(() -> {
-                    progressBar.setVisibility(View.GONE);
-                    temperatureTextView.setText(weather.temperature);
-                    descriptionTextView.setText(weather.description);
-                });
-            }
-
-            @Override
-            public void onError(String message) {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(() -> {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                });
-            }
+        viewModel.weatherLiveData.observe(getViewLifecycleOwner(), weather -> {
+            temperatureTextView.setText(weather.temperature);
+            descriptionTextView.setText(weather.description);
         });
+
+        viewModel.errorLiveData.observe(getViewLifecycleOwner(), error -> {
+            Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+        });
+
+        viewModel.loadingLiveData.observe(getViewLifecycleOwner(), isLoading -> {
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
+
+        viewModel.loadWeather();
     }
 }
