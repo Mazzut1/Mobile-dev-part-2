@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "941331593959",
+    "project_id": "lesson9-2e3e0",
+    "storage_bucket": "lesson9-2e3e0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941331593959:android:82c34a57a62243566e4042",
+        "android_client_info": {
+          "package_name": "ru.mirea.tenyutinmm.lesson9"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd9UXGUEfdntGhT1Q8_jdDay2fDa3HRd4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
