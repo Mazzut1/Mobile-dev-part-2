@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/navigation_profile"
+            android:icon="@android:drawable/ic_menu_myplaces"
+            android:title="Профиль" />
+        <item
+            android:id="@+id/navigation_weather"
+            android:icon="@android:drawable/ic_menu_mapmode"
+            android:title="Погода (API)" />
+        <item
+            android:id="@+id/navigation_cats"
+            android:icon="@android:drawable/ic_menu_gallery"
+            android:title="Котики (API + Room)" />
+        <item
+            android:id="@+id/navigation_books"
+            android:icon="@android:drawable/ic_menu_edit"
+            android:title="Книги (Stub)" />
+        <item
+            android:id="@+id/navigation_todo"
+            android:icon="@android:drawable/ic_menu_my_calendar"
+            android:title="Дела (Retrofit)" />
+        <item
+            android:id="@+id/navigation_countries"
+            android:icon="@android:drawable/ic_menu_compass"
+            android:title="Страны (Fragments)" />
+        <item
+            android:id="@+id/navigation_scrollview"
+            android:icon="@android:drawable/ic_menu_sort_by_size"
+            android:title="Прогрессия (ScrollView)" />
+        <item
+            android:id="@+id/navigation_listview"
+            android:icon="@android:drawable/ic_menu_agenda"
+            android:title="Авторы (ListView)" />
+    </group>
+</menu>
