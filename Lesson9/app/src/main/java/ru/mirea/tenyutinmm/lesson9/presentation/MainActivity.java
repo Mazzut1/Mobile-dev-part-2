@@ -43,10 +43,8 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.navigation_books) {
                     selectedFragment = new BooksFragment();
                 }
-                else if (itemId == R.id.navigation_scrollview) {
-                    selectedFragment = new ScrollViewFragment();
-                } else if (itemId == R.id.navigation_listview) {
-                    selectedFragment = new ListViewFragment();
+                else if (itemId == R.id.navigation_todo) {
+                    selectedFragment = new TodoFragment();
                 }
 
                 if (selectedFragment != null) {

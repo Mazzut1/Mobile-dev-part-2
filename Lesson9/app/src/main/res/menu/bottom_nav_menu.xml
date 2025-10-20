@@ -13,11 +13,7 @@
         android:icon="@android:drawable/ic_menu_edit"
         android:title="Книги" />
     <item
-        android:id="@+id/navigation_scrollview"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
-        android:title="Прогрессия" />
-    <item
-        android:id="@+id/navigation_listview"
-        android:icon="@android:drawable/ic_menu_agenda"
-        android:title="Авторы" />
+        android:id="@+id/navigation_todo"
+        android:icon="@android:drawable/ic_menu_my_calendar"
+        android:title="Дела" />
 </menu>
