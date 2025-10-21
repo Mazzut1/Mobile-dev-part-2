@@ -1,33 +1,287 @@
-**Отчет по 1 практической работе**
+**Отчет по практической работе №3**
 
-В рамках данной практической работы, были освоены и изучены принципы проектирования приложения с разделением его на 3 основных уровня: domain, data, presentation. Выполнено проектирование собственного приложения, а также реализован каркас приложения. 
-Задание 1. Use – Case диаграмм приложения
-MyBookTracker - мобильное приложение, которое помогает пользователям вести учет прочитанных книг. Гостевые пользователи смогут просматривать общий список популярных книг и информацию о них. Авторизованные пользователи получат доступ ко всему функционалу гостя, а также смогут управлять своей личной библиотекой: добавлять новые книги, отмечать их статус (прочитано/читаю/хочу прочитать) и просматривать свою коллекцию.
-<img width="704" height="782" alt="image" src="https://github.com/user-attachments/assets/60090e6e-d2f2-46ce-bfe5-f1468b3c790a" />
+**Цель работы** Основной целью данной работы была модификация слоя представления (app) для соответствия архитектурному паттерну MVVM. Это включало в себя декомпозицию Fragment на две составляющие: View (за отображение) и ViewModel (за бизнес-логику и управление состоянием). Для обеспечения реактивного обновления UI и решения проблемы сохранения состояния при повороте экрана была внедрена библиотека LiveData.
 
-**Задание №2: Проектирование по уровням**
-<img width="834" height="709" alt="image" src="https://github.com/user-attachments/assets/30fbc245-2cff-46ec-b943-3b3353638a0a" />
- 
-**Задание №3: Реализация проекта**
-Для выполнения данного задания был создан новый проект «lesson9». Внутри проекта было создано 3 основных пакета: domain, data и presentation. На уровне domain были прописаны два сценария использования (UseCase) для сохранения любимой книги и отображения сохранённых данных, а также реализован интерфейс BookRepository. На уровне domain была также создана модель Book, а на уровне data прописана конкретная реализация интерфейса BookRepository. На уровне presentation в файле MainActivity прописана логика обработки нажатий на кнопки. В реализацию интерфейса было добавлено сохранение данных о любимой книге через SharedPreferences, что соответствует требованиям методички.
-<img width="680" height="1518" alt="image" src="https://github.com/user-attachments/assets/c1c90972-e4fe-4514-826e-01f391831c8a" />
- 
-По нажатию на кнопку «сохранить любимую книгу» данные успешно сохраняются:
-<img width="690" height="1518" alt="image" src="https://github.com/user-attachments/assets/02ae81ab-c5ad-4c80-990c-dfd6c7a89778" />
- 
-По нажатии на Конопку «отобразить любимую книгу» введенные ранее данные книги отображаются:
- <img width="683" height="1518" alt="image" src="https://github.com/user-attachments/assets/4a91ca90-aeba-4a6b-bf66-1d5df725e3bf" />
+**1. Внедрение MVVM и LiveData**
 
-**Задание №4: Тестирование каркаса приложения (Контрольное задание)**
+Для каждого функционального экрана ("Книги", "Котики", "Погода" и т.д.) был создан свой класс ViewModel, наследуемый от androidx.lifecycle.ViewModel. Вся логика взаимодействия с репозиториями из слоя domain была перенесена из Фрагментов во ViewModel.
 
-Финальным этапом работы стала проверка корректности работы созданной архитектуры. Для этого была использована встроенная в Android Studio система логирования Logcat. В файл MainActivity были добавлены вызовы Log.d() в ключевые моменты жизненного цикла и взаимодействия с пользователем: при создании Activity, при нажатии на кнопку сохранения и при нажатии на кнопку получения данных. Это позволяет в реальном времени отследить корректность выполнения кода и проверить, какие именно данные передаются на каждом этапе, не загромождая пользовательский интерфейс.
+Для корректной инициализации ViewModel с передачей зависимостей (таких как репозитории, которым нужен Context) был создан единый класс ViewModelFactory. Эта фабрика отвечает за создание всех ViewModel в приложении, что позволяет изолировать их от Android-компонентов и следовать принципам инверсии управления.
+<img width="974" height="433" alt="image" src="https://github.com/user-attachments/assets/7b024fcc-6bfa-439e-96be-bb00265a0ef5" />
+**Фрагменты (MyLibraryFragment, CatsFragment и др.) теперь не содержат бизнес-логики. Они только:**
+1.	Инициализируют свою ViewModel через ViewModelProvider и нашу фабрику.
+2.	Подписываются на изменения LiveData, предоставляемых ViewModel.
+3.	Передают действия пользователя (например, клики по кнопкам) в методы ViewModel.
 
-**Структура проекта:**
- <img width="910" height="1518" alt="image" src="https://github.com/user-attachments/assets/17606514-b3ca-478d-a45a-a8614ac717d5" />
 
-**Результат тестирования в Logcat:**
- 
-<img width="974" height="168" alt="image" src="https://github.com/user-attachments/assets/6ca8eb5d-8975-422c-965c-8e58f1063e56" />
+Такой подход делает код Фрагментов значительно чище, а всю логику — легко тестируемой и независимой от UI.
+<img width="974" height="442" alt="image" src="https://github.com/user-attachments/assets/428f2aee-1aef-4821-971d-47cf45ed4645" />
+```
+package ru.mirea.tenyutinmm.lesson9.presentation;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import ru.mirea.tenyutinmm.lesson9.R;
+
+public class MyLibraryFragment extends Fragment {
+
+    private MyLibraryViewModel viewModel;
+    private RecyclerView recyclerView;
+    private BookAdapter bookAdapter;
+    private EditText bookTitleEditText;
+    private Button saveButton;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_my_library, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(requireContext()))
+                .get(MyLibraryViewModel.class);
+
+        recyclerView = view.findViewById(R.id.rv_books);
+        bookTitleEditText = view.findViewById(R.id.et_book_title);
+        saveButton = view.findViewById(R.id.btn_save_book);
+
+        setupRecyclerView();
+
+        saveButton.setOnClickListener(v -> {
+            String title = bookTitleEditText.getText().toString();
+            viewModel.saveBook(title);
+            bookTitleEditText.setText("");
+            Toast.makeText(getContext(), "Книга сохранена", Toast.LENGTH_SHORT).show();
+        });
+
+        viewModel.booksLiveData.observe(getViewLifecycleOwner(), books -> {
+            bookAdapter.setBooks(books);
+        });
+
+        viewModel.loadBooks();
+    }
+
+    private void setupRecyclerView() {
+        bookAdapter = new BookAdapter();
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(bookAdapter);
+    }
+}
+```
+<img width="974" height="433" alt="image" src="https://github.com/user-attachments/assets/1e659452-cd43-496f-a6bc-bc4d97a701fe" />
+
+Благодаря ViewModel и LiveData, состояние экрана теперь сохраняется при повороте устройства. ViewModel "переживает" пересоздание Фрагмента, а LiveData немедленно отдает новому экземпляру Фрагмента последние актуальные данные, избегая повторных загрузок из сети или базы данных.
+<img width="974" height="419" alt="image" src="https://github.com/user-attachments/assets/4d578c10-6461-4f54-860e-64fb1f203b4d" />
+
+**2. Контрольное задание: Изучение MediatorLiveData**
+
+В рамках контрольного задания требовалось изучить и применить MediatorLiveData. Этот компонент был реализован в CatsViewModel для координации нескольких источников данных.
+MediatorLiveData используется для объединения двух состояний:
+•	_catsSource: LiveData, содержащая сам список котиков, полученный из репозитория.
+•	_isLoadingSource: LiveData, хранящая флаг состояния загрузки (true/false).
+
+MediatorLiveData (_catsLiveData) подписывается на _catsSource. Как только из репозитория приходят новые данные, Mediator не только обновляет свое значение (передавая список котиков в UI), но и выполняет побочный эффект — устанавливает _isLoadingSource в false, убирая с экрана ProgressBar.
+
+Это демонстрирует основную мощь MediatorLiveData — возможность реагировать на изменения в одних LiveData и вызывать изменения в других, создавая сложные цепочки реактивной логики.
+
+Ниже приведены листинги ключевых файлов, демонстрирующих реализацию MVVM.
+
+**Листинг 1: presentation/CatsViewModel.java**
+```
+package ru.mirea.tenyutinmm.lesson9.presentation;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+import java.util.List;
+import ru.mirea.tenyutinmm.domain.cat.Cat;
+import ru.mirea.tenyutinmm.domain.cat.CatRepository;
+
+public class CatsViewModel extends ViewModel {
+
+    private final CatRepository catRepository;
+
+    private final MutableLiveData<List<Cat>> catsSource = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoadingSource = new MutableLiveData<>();
+    private final MutableLiveData<String> errorSource = new MutableLiveData<>();
+
+    public final LiveData<Boolean> isLoading = isLoadingSource;
+    public final LiveData<String> error = errorSource;
+
+    private final MediatorLiveData<List<Cat>> catsLiveData = new MediatorLiveData<>();
+    public LiveData<List<Cat>> getCatsLiveData() {
+        return catsLiveData;
+    }
+
+    public CatsViewModel(CatRepository catRepository) {
+        this.catRepository = catRepository;
+        catsLiveData.addSource(catsSource, cats -> {
+            catsLiveData.setValue(cats);
+            isLoadingSource.setValue(false);
+        });
+    }
+
+    public void loadCats() {
+        isLoadingSource.setValue(true);
+        catRepository.getCats(new CatRepository.CatsCallback() {
+            @Override
+            public void onSuccess(List<Cat> cats) {
+                catsSource.postValue(cats);
+            }
+
+            @Override
+            public void onError(String message) {
+                errorSource.postValue(message);
+                isLoadingSource.postValue(false);
+            }
+        });
+    }
+}
+```
+**Листинг 2: presentation/CatsFragment.java**
+
+Фрагмент, который теперь полностью управляется CatsViewModel. Он только подписывается на LiveData и отображает данные, не содержа бизнес-логики.
+```
+package ru.mirea.tenyutinmm.lesson9.presentation;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
+import ru.mirea.tenyutinmm.lesson9.R;
+
+public class CatsFragment extends Fragment {
+
+    private CatsViewModel viewModel;
+    private RecyclerView recyclerView;
+    private ProgressBar progressBar;
+    private CatAdapter catAdapter;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_cats, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(requireContext()))
+                .get(CatsViewModel.class);
+
+        recyclerView = view.findViewById(R.id.rv_cats);
+        progressBar = view.findViewById(R.id.progressBar);
+
+        setupRecyclerView();
+
+        viewModel.getCatsLiveData().observe(getViewLifecycleOwner(), cats -> {
+            catAdapter.setCats(cats);
+        });
+
+        viewModel.isLoading.observe(getViewLifecycleOwner(), isLoading -> {
+            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
+
+        viewModel.error.observe(getViewLifecycleOwner(), error -> {
+            if (error != null) Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+        });
+
+        if (viewModel.getCatsLiveData().getValue() == null) {
+            viewModel.loadCats();
+        }
+    }
+
+    private void setupRecyclerView() {
+        catAdapter = new CatAdapter(cat -> {
+            Intent intent = new Intent(getActivity(), CatDetailActivity.class);
+            intent.putExtra("cat_url", cat.url);
+            startActivity(intent);
+        });
+        recyclerView.setAdapter(catAdapter);
+    }
+}
+```
+**Листинг 3: presentation/ViewModelFactory.java**
+
+Единая фабрика, отвечающая за создание всех ViewModel в приложении и внедрение в них необходимых зависимостей (репозиториев). Это позволяет ViewModel оставаться независимыми от Android Context.
+```
+package ru.mirea.tenyutinmm.lesson9.presentation;
+
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+
+import ru.mirea.tenyutinmm.data.book.BookRepositoryImpl;
+import ru.mirea.tenyutinmm.data.cat.CatRepositoryImpl;
+import ru.mirea.tenyutinmm.data.country.CountryRepositoryImpl;
+import ru.mirea.tenyutinmm.data.todo.TodoRepositoryImpl;
+import ru.mirea.tenyutinmm.data.weather.WeatherRepositoryImpl;
+import ru.mirea.tenyutinmm.domain.book.BookRepository;
+import ru.mirea.tenyutinmm.domain.cat.CatRepository;
+import ru.mirea.tenyutinmm.domain.country.CountryRepository;
+import ru.mirea.tenyutinmm.domain.todo.TodoRepository;
+import ru.mirea.tenyutinmm.domain.weather.WeatherRepository;
+
+public class ViewModelFactory implements ViewModelProvider.Factory {
+    private final Context context;
+
+    public ViewModelFactory(Context context) {
+        this.context = context.getApplicationContext();
+    }
+
+    @NonNull
+    @Override
+    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+        if (modelClass.isAssignableFrom(MyLibraryViewModel.class)) {
+            BookRepository bookRepository = new BookRepositoryImpl(context);
+            return (T) new MyLibraryViewModel(bookRepository);
+        }
+        else if (modelClass.isAssignableFrom(WeatherViewModel.class)) {
+            WeatherRepository weatherRepository = new WeatherRepositoryImpl();
+            return (T) new WeatherViewModel(weatherRepository);
+        } else if (modelClass.isAssignableFrom(CatsViewModel.class)) {
+            CatRepository catRepository = new CatRepositoryImpl(context);
+            return (T) new CatsViewModel(catRepository);
+        } else if (modelClass.isAssignableFrom(TodoViewModel.class)) {
+            TodoRepository todoRepository = new TodoRepositoryImpl();
+            return (T) new TodoViewModel(todoRepository);
+        }
+        throw new IllegalArgumentException("Unknown ViewModel class: " + modelClass.getName());
+    }
+}
+```
+
+В результате выполнения данной практической работы приложение было успешно переведено на архитектуру MVVM. Вся бизнес-логика и управление состоянием вынесены во ViewModel, а Fragment отвечает только за отображение. Использование LiveData и MediatorLiveData обеспечивает реактивное и отказоустойчивое обновление UI.
+
+
+
+
+
 
 
 
