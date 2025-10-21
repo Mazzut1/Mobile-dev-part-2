@@ -15,9 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import ru.mirea.tenyutinmm.lesson9.R;
 
-public class BooksFragment extends Fragment {
+public class MyLibraryFragment extends Fragment {
 
-    private BooksViewModel viewModel;
+    private MyLibraryViewModel viewModel;
     private RecyclerView recyclerView;
     private BookAdapter bookAdapter;
     private EditText bookTitleEditText;
@@ -26,7 +26,7 @@ public class BooksFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_books, container, false);
+        return inflater.inflate(R.layout.fragment_my_library, container, false);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class BooksFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(this, new ViewModelFactory(requireContext()))
-                .get(BooksViewModel.class);
+                .get(MyLibraryViewModel.class);
 
         recyclerView = view.findViewById(R.id.rv_books);
         bookTitleEditText = view.findViewById(R.id.et_book_title);

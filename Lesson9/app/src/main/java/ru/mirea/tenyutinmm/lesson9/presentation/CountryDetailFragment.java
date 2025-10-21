@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import com.bumptech.glide.Glide;
 import com.github.twocoffeesoneteam.glidetovectoryou.GlideToVectorYou;
 import ru.mirea.tenyutinmm.lesson9.R;
 
@@ -25,7 +24,7 @@ public class CountryDetailFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedViewModel = new ViewModelProvider(requireParentFragment()).get(CountriesSharedViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(CountriesSharedViewModel.class);
     }
 
     @Nullable
@@ -52,6 +51,11 @@ public class CountryDetailFragment extends Fragment {
 
                 GlideToVectorYou.justLoadImage(getActivity(),
                         android.net.Uri.parse(country.flagUrl), flagImageView);
+            } else {
+                countryNameTextView.setText("Выберите страну из списка");
+                capitalTextView.setText("");
+                addNoteButton.setVisibility(View.GONE);
+                flagImageView.setImageDrawable(null);
             }
         });
 

@@ -19,7 +19,7 @@ public class NoteBottomSheetFragment extends BottomSheetDialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedViewModel = new ViewModelProvider(requireParentFragment()).get(CountriesSharedViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(CountriesSharedViewModel.class);
     }
 
     @Nullable
@@ -34,6 +34,12 @@ public class NoteBottomSheetFragment extends BottomSheetDialogFragment {
 
         EditText noteEditText = view.findViewById(R.id.et_note);
         Button sendButton = view.findViewById(R.id.btn_send_note);
+
+        sharedViewModel.getCurrentNote().observe(getViewLifecycleOwner(), currentNote -> {
+            if (currentNote != null) {
+                noteEditText.setText(currentNote);
+            }
+        });
 
         sendButton.setOnClickListener(v -> {
             String noteText = noteEditText.getText().toString();

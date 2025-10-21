@@ -7,13 +7,13 @@ import java.util.List;
 import ru.mirea.tenyutinmm.domain.book.Book;
 import ru.mirea.tenyutinmm.domain.book.BookRepository;
 
-public class BooksViewModel extends ViewModel {
+public class MyLibraryViewModel extends ViewModel {
     private final BookRepository bookRepository;
 
     private final MutableLiveData<List<Book>> _booksLiveData = new MutableLiveData<>();
     public final LiveData<List<Book>> booksLiveData = _booksLiveData;
 
-    public BooksViewModel(BookRepository bookRepository) {
+    public MyLibraryViewModel(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
     }
 

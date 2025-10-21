@@ -1,5 +1,6 @@
 package ru.mirea.tenyutinmm.lesson9.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import ru.mirea.tenyutinmm.lesson9.R;
+
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public boolean isGuest;
@@ -53,14 +55,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (isGuest) {
             navigationView.getMenu().findItem(R.id.navigation_books).setVisible(false);
             navigationView.getMenu().findItem(R.id.navigation_profile).setVisible(false);
+        } else {
+            navigationView.getMenu().findItem(R.id.navigation_login).setVisible(false);
         }
 
         if (savedInstanceState == null) {
-            navigateToFragment(new ProfileFragment(), false);
             if (isGuest) {
                 navigateToFragment(new WeatherFragment(), false);
+                navigationView.setCheckedItem(R.id.navigation_weather);
+            } else {
+                navigateToFragment(new ProfileFragment(), false);
+                navigationView.setCheckedItem(R.id.navigation_profile);
             }
-            navigationView.setCheckedItem(isGuest ? R.id.navigation_weather : R.id.navigation_profile);
         }
     }
 
@@ -86,15 +92,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Fragment selectedFragment = null;
         int itemId = item.getItemId();
 
+        if (itemId == R.id.navigation_login) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            return true;
+        }
+
         if (itemId == R.id.navigation_profile) {
             selectedFragment = new ProfileFragment();
         } else if (itemId == R.id.navigation_weather) {
             selectedFragment = new WeatherFragment();
         } else if (itemId == R.id.navigation_cats) {
             selectedFragment = new CatsFragment();
-        } else if (itemId == R.id.navigation_books) {
-            selectedFragment = new BooksFragment();
-        } else if (itemId == R.id.navigation_todo) {
+        }
+        else if (itemId == R.id.navigation_books) {
+            selectedFragment = new MyLibraryFragment();
+        }
+        else if (itemId == R.id.navigation_todo) {
             selectedFragment = new TodoFragment();
         } else if (itemId == R.id.navigation_countries) {
             selectedFragment = new CountriesFragment();

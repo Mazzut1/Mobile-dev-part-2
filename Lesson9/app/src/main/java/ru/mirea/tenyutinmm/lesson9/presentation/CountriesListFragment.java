@@ -26,7 +26,7 @@ public class CountriesListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedViewModel = new ViewModelProvider(requireParentFragment()).get(CountriesSharedViewModel.class);
+        sharedViewModel = new ViewModelProvider(requireActivity()).get(CountriesSharedViewModel.class);
         countryRepository = new CountryRepositoryImpl();
     }
 

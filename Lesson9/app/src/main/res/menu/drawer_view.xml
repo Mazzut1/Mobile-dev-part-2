@@ -37,4 +37,14 @@
             android:icon="@android:drawable/ic_menu_agenda"
             android:title="Авторы (ListView)" />
     </group>
+
+    <item android:title="Аккаунт">
+        <menu>
+            <item
+                android:id="@+id/navigation_login"
+                android:icon="@android:drawable/ic_menu_send"
+                android:title="Войти или Зарегистрироваться" />
+        </menu>
+    </item>
+
 </menu>
