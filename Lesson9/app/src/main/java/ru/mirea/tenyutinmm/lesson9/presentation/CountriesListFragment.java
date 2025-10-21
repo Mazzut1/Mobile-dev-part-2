@@ -11,17 +11,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import java.util.List;
+import java.util.stream.Collectors;
+import ru.mirea.tenyutinmm.data.country.CountryRepositoryImpl;
+import ru.mirea.tenyutinmm.domain.country.Country;
+import ru.mirea.tenyutinmm.domain.country.CountryRepository;
 import ru.mirea.tenyutinmm.lesson9.R;
 
 public class CountriesListFragment extends Fragment {
 
     private CountriesSharedViewModel sharedViewModel;
-    private final String[] countries = { "Бразилия", "Китай", "Индия", "Россия", "ЮАР" };
+    private CountryRepository countryRepository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedViewModel = new ViewModelProvider(requireParentFragment()).get(CountriesSharedViewModel.class);
+        countryRepository = new CountryRepositoryImpl();
     }
 
     @Nullable
@@ -40,12 +46,15 @@ public class CountriesListFragment extends Fragment {
         }
 
         ListView listView = view.findViewById(R.id.countries_list_view);
+        List<Country> countries = countryRepository.getCountries();
+
+        List<String> countryNames = countries.stream().map(c -> c.name).collect(Collectors.toList());
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_list_item_1, countries);
+                android.R.layout.simple_list_item_1, countryNames);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener((parent, itemView, position, id) -> {
-            String selectedCountry = (String) parent.getItemAtPosition(position);
+            Country selectedCountry = countries.get(position);
             sharedViewModel.selectCountry(selectedCountry);
         });
     }

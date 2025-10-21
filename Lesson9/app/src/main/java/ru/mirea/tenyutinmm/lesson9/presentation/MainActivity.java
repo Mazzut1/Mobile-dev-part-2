@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (savedInstanceState == null) {
-            navigateToFragment(new ProfileFragment(), false); // Начинаем с профиля (или погоды, если гость)
+            navigateToFragment(new ProfileFragment(), false);
             if (isGuest) {
                 navigateToFragment(new WeatherFragment(), false);
             }

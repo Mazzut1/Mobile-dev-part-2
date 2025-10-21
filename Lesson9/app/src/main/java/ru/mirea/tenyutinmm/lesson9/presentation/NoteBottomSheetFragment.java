@@ -8,10 +8,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import ru.mirea.tenyutinmm.lesson9.R;
 
 public class NoteBottomSheetFragment extends BottomSheetDialogFragment {
+
+    private CountriesSharedViewModel sharedViewModel;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sharedViewModel = new ViewModelProvider(requireParentFragment()).get(CountriesSharedViewModel.class);
+    }
 
     @Nullable
     @Override
@@ -28,9 +37,7 @@ public class NoteBottomSheetFragment extends BottomSheetDialogFragment {
 
         sendButton.setOnClickListener(v -> {
             String noteText = noteEditText.getText().toString();
-            Bundle result = new Bundle();
-            result.putString("noteKey", noteText);
-            getParentFragmentManager().setFragmentResult("noteRequestKey", result);
+            sharedViewModel.saveNote(noteText);
             dismiss();
         });
     }
