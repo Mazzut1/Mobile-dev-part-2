@@ -9,7 +9,7 @@
 <img width="974" height="559" alt="image" src="https://github.com/user-attachments/assets/5e93e545-fef5-435a-8c9b-f6b4aaad7076" />
 <img width="974" height="201" alt="image" src="https://github.com/user-attachments/assets/ff586eb2-bd0c-4516-a2e5-c633981255b0" />
 **Листинг 1: domain/cat/CatRepository.java**
-package ru.mirea.tenyutinmm.domain.cat;
+``` package ru.mirea.tenyutinmm.domain.cat;
 
 import java.util.List;
 
@@ -20,10 +20,10 @@ public interface CatRepository {
         void onSuccess(List<Cat> cats);
         void onError(String message);
     }
-}
+}```
 **Листинг 2: data/cat/CatRepositoryImpl.java**
 Реализация репозитория в data-слое. Этот класс инкапсулирует сложную логику: он пытается получить данные из базы данных Room (catDao), а если их там нет, то делает запрос в сеть через Retrofit (catApi), сохраняет результат в базу и отдает его.
-package ru.mirea.tenyutinmm.data.cat;
+```package ru.mirea.tenyutinmm.data.cat;
 
 import android.content.Context;
 import androidx.annotation.NonNull;
@@ -114,7 +114,7 @@ public class CatRepositoryImpl implements CatRepository {
         }
         return cats;
     }
-}
+} ```
 **2. Контрольное задание и демонстрация функционала**
 В рамках контрольных заданий был реализован широкий спектр функционала, превративший простое приложение в многоцелевой инструмент.
 При первом запуске приложение отображает экран входа, реализованный с помощью Firebase Authentication. Пользователь может войти, зарегистрироваться или продолжить как гость.
@@ -132,7 +132,7 @@ public class CatRepositoryImpl implements CatRepository {
 <img width="974" height="467" alt="image" src="https://github.com/user-attachments/assets/441051c5-87d9-4197-9783-d47b6508cd8d" />
 **Листинг 3: presentation/MainActivity.java**
 Финальная версия MainActivity, которая управляет DrawerLayout, навигацией между всеми фрагментами, созданием SharedViewModel и разграничением прав доступа для гостевых и авторизованных пользователей.
-package ru.mirea.tenyutinmm.lesson9.presentation;
+```package ru.mirea.tenyutinmm.lesson9.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -281,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             super.onBackPressed();
         }
     }
-}
+}```
 
 В данных практических работах, работа всеми практиками, а также приложением велась только в одной папке Lesson9. Поэтому весь функционал приложения, который реализовывался во всех практиках, находится в одной папке и в следствии в одном приложении.
 
