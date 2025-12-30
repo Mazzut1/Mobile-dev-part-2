@@ -1,22 +1,17 @@
 package ru.mirea.tenyutinmm.data.network;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.List;
 
 public class WeatherResponse {
 
-    @SerializedName("current_condition")
-    public List<CurrentCondition> currentCondition;
+    @SerializedName("current_weather")
+    public CurrentWeather currentWeather;
 
-    public static class CurrentCondition {
-        @SerializedName("temp_C")
-        public String tempC;
+    public static class CurrentWeather {
+        @SerializedName("temperature")
+        public double temperature;
 
-        @SerializedName("weatherDesc")
-        public List<WeatherDesc> weatherDesc;
-    }
-
-    public static class WeatherDesc {
-        public String value;
+        @SerializedName("weathercode")
+        public int weatherCode;
     }
 }

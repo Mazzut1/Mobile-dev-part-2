@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ДОБАВЬТЕ ЭТУ СТРОКУ -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -15,25 +14,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lesson9"
         tools:targetApi="31">
-        <activity
-            android:name=".presentation.CatDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".presentation.WeatherActivity"
-            android:exported="false" /> <!-- LoginActivity ТЕПЕРЬ является стартовым экраном -->
+
         <activity
             android:name=".presentation.LoginActivity"
-            android:exported="true"> <!-- Изменено на true, чтобы система могла запустить этот экран -->
-            <!-- Этот блок ПЕРЕНЕСЕН сюда из MainActivity -->
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- MainActivity теперь обычный экран, который мы запускаем из кода -->
+        </activity>
+
         <activity
             android:name=".presentation.MainActivity"
             android:exported="false" />
+
     </application>
 
 </manifest>

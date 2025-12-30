@@ -58,9 +58,18 @@ public class CatsFragment extends Fragment {
 
     private void setupRecyclerView() {
         catAdapter = new CatAdapter(cat -> {
-            Intent intent = new Intent(getActivity(), CatDetailActivity.class);
-            intent.putExtra("cat_url", cat.url);
-            startActivity(intent);
+            // --- СТАРАЯ ЛОГИКА (УДАЛИТЬ) ---
+            // Intent intent = new Intent(getActivity(), CatDetailActivity.class);
+            // intent.putExtra("cat_url", cat.url);
+            // startActivity(intent);
+
+            // --- НОВАЯ ЛОГИКА (NAVIGATION COMPONENT) ---
+            Bundle bundle = new Bundle();
+            bundle.putString("cat_url", cat.url);
+
+            // Навигация к фрагменту деталей
+            androidx.navigation.Navigation.findNavController(requireView())
+                    .navigate(R.id.catDetailFragment, bundle);
         });
         recyclerView.setAdapter(catAdapter);
     }

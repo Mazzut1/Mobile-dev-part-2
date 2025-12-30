@@ -3,6 +3,9 @@ package ru.mirea.tenyutinmm.lesson9.presentation;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -10,7 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -18,29 +21,37 @@ import com.bumptech.glide.request.transition.Transition;
 
 import ru.mirea.tenyutinmm.lesson9.R;
 
-public class CatDetailActivity extends AppCompatActivity {
+public class CatDetailFragment extends Fragment {
 
     private ImageView catImageView;
     private Button analyzeButton;
     private TextView resultTextView;
 
-
     private ImageClassifier imageClassifier;
     private Bitmap imageBitmap;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cat_detail);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.activity_cat_detail, container, false);
+    }
 
-        catImageView = findViewById(R.id.iv_cat_detail);
-        analyzeButton = findViewById(R.id.btn_analyze);
-        resultTextView = findViewById(R.id.tv_result);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        imageClassifier = new ImageClassifier(this);
+        catImageView = view.findViewById(R.id.iv_cat_detail);
+        analyzeButton = view.findViewById(R.id.btn_analyze);
+        resultTextView = view.findViewById(R.id.tv_result);
+
+        imageClassifier = new ImageClassifier(requireContext());
         imageClassifier.initialize();
 
-        String catUrl = getIntent().getStringExtra("cat_url");
+        String catUrl = null;
+        if (getArguments() != null) {
+            catUrl = getArguments().getString("cat_url");
+        }
+
         if (catUrl != null) {
             Glide.with(this)
                     .asBitmap()
@@ -62,10 +73,12 @@ public class CatDetailActivity extends AppCompatActivity {
             if (imageBitmap != null) {
                 new Thread(() -> {
                     final String result = imageClassifier.classify(imageBitmap);
-                    runOnUiThread(() -> resultTextView.setText("Результат: " + result));
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> resultTextView.setText("Результат: " + result));
+                    }
                 }).start();
             } else {
-                Toast.makeText(this, "Изображение еще не загружено", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Изображение еще не загружено", Toast.LENGTH_SHORT).show();
             }
         });
     }

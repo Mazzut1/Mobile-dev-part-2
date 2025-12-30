@@ -16,6 +16,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -49,6 +53,11 @@ dependencies {
     implementation(libs.lifecycle.livedata)
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.github.corouteam:GlideToVectorYou:v2.0.0")
+
+    val nav_version = "2.8.4"
+    implementation("androidx.navigation:navigation-fragment:$nav_version")
+    implementation("androidx.navigation:navigation-ui:$nav_version")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

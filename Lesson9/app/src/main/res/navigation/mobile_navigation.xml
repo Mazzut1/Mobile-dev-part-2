@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_profile">
+
+    <!-- Профиль -->
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.ProfileFragment"
+        android:label="Профиль"
+        tools:layout="@layout/fragment_profile" />
+
+    <!-- Погода -->
+    <fragment
+        android:id="@+id/navigation_weather"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.WeatherFragment"
+        android:label="Погода"
+        tools:layout="@layout/fragment_weather" />
+
+    <!-- Котики -->
+    <fragment
+        android:id="@+id/navigation_cats"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.CatsFragment"
+        android:label="Котики"
+        tools:layout="@layout/fragment_cats" />
+
+    <!-- Книги -->
+    <fragment
+        android:id="@+id/navigation_books"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.MyLibraryFragment"
+        android:label="Моя библиотека"
+        tools:layout="@layout/fragment_my_library" />
+
+    <!-- Дела -->
+    <fragment
+        android:id="@+id/navigation_todo"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.TodoFragment"
+        android:label="Список дел"
+        tools:layout="@layout/fragment_todo" />
+
+    <!-- Страны -->
+    <fragment
+        android:id="@+id/navigation_countries"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.CountriesFragment"
+        android:label="Страны"
+        tools:layout="@layout/fragment_countries" />
+
+    <!-- Прогрессия -->
+    <fragment
+        android:id="@+id/navigation_scrollview"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.ScrollViewFragment"
+        android:label="Прогрессия"
+        tools:layout="@layout/fragment_scroll_view" />
+
+    <!-- Авторы -->
+    <fragment
+        android:id="@+id/navigation_listview"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.ListViewFragment"
+        android:label="Авторы"
+        tools:layout="@layout/fragment_list_view" />
+
+    <!-- Экран деталей котика -->
+    <fragment
+        android:id="@+id/catDetailFragment"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.CatDetailFragment"
+        android:label="Анализ котика"
+        tools:layout="@layout/activity_cat_detail" />
+
+</navigation>
+
+
+
