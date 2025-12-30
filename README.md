@@ -12,4 +12,6 @@
 
 [Практическая работа 6](https://github.com/Mazzut1/Mobile-dev-part-2/blob/main/pr6/README.md)
 
+[Практическая работа 7](https://github.com/Mazzut1/Mobile-dev-part-2/blob/main/pr7/README.md)
+
 [Скриншоты приложения](https://github.com/Mazzut1/Mobile-dev-part-2/blob/main/photo/README.md)
