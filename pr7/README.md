@@ -1,67 +1,218 @@
-**Отчет по практической работе №6**
+**Отчет по практической работе №7**
 
-**Цель работы**
+**Цель работы:**
 
-Целью работы было углубленное изучение компонента Fragment в Android. Ключевыми задачами были: реализация динамической навигации между фрагментами с помощью FragmentManager, управление бэк-стеком, а также освоение современных способов обмена данными между фрагментами, таких как SharedViewModel и Fragment Result API.
+Целью работы было освоение современных инструментов навигации в Android. Ключевыми задачами являлись: отказ от findViewById в пользу View Binding, переход на архитектуру Single Activity с использованием Android Navigation Component, реализация бокового меню Navigation Drawer и интеграция всех существующих экранов в единый граф навигации.
 
-**1. Динамическое управление Фрагментами и FragmentManager**
+**1. Настройка View Binding и зависимостей**
 
-В ходе выполнения работы приложение было полностью переведено на архитектуру Single Activity. Вся навигация между экранами теперь осуществляется в рамках одной MainActivity путем замены Фрагментов внутри FrameLayout.
+Первым шагом была модификация файла сборки build.gradle.kts. В проекте был активирован механизм View Binding, который позволяет безопасно обращаться к элементам интерфейса, исключая ошибки NullPointerException и проблемы с типами данных. Также были добавлены зависимости для библиотеки Navigation Component.
 
-Для управления навигацией используется боковое меню DrawerLayout. В MainActivity реализован ActionBarDrawerToggle для открытия/закрытия меню и OnNavigationItemSelectedListener для обработки кликов.
+**Листинг 1: app/build.gradle.kts (фрагмент)**
 
-При выборе пункта меню выполняется транзакция replace() с добавлением в бэк-стек (addToBackStack(null)). Это обеспечивает корректную и интуитивно понятную работу системной кнопки "Назад": вместо закрытия приложения происходит возврат на предыдущий открытый фрагмент.
-<img width="974" height="584" alt="image" src="https://github.com/user-attachments/assets/31858813-a35c-4bed-b3fb-335abfddc8ce" />
+Демонстрация включения View Binding и добавления библиотек навигации.
+```
+plugins {
+    alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
+}
 
-**Листинг 1: presentation/MainActivity.java**
+android {
+    namespace = "ru.mirea.tenyutinmm.lesson9"
+    compileSdk = 34
 
-Фрагмент кода, демонстрирующий управление FragmentManager, DrawerLayout и обработку навигации с использованием бэк-стека.
+    defaultConfig {
+        applicationId = "ru.mirea.tenyutinmm.lesson9"
+        minSdk = 26
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    aaptOptions {
+        noCompress("tflite")
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation(project(":domain"))
+    implementation(project(":data"))
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.activity)
+    implementation(libs.constraintlayout)
+    implementation(libs.glide)
+    implementation(libs.tensorflow.lite.task.vision)
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.livedata)
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("com.github.corouteam:GlideToVectorYou:v2.0.0")
+
+    val nav_version = "2.8.4"
+    implementation("androidx.navigation:navigation-fragment:$nav_version")
+    implementation("androidx.navigation:navigation-ui:$nav_version")
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+}
+```
+**2. Реализация Navigation Component**
+Основой навигации стал Navigation Graph — XML-ресурс, в котором описаны все фрагменты приложения (экраны) и связи между ними. Каждому фрагменту был присвоен уникальный ID, совпадающий с ID пунктов меню, что позволило автоматизировать переходы.
+
+**Листинг 2: res/navigation/mobile_navigation.xml**
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_profile">
+
+    <!-- Профиль -->
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.ProfileFragment"
+        android:label="Профиль"
+        tools:layout="@layout/fragment_profile" />
+
+    <!-- Погода -->
+    <fragment
+        android:id="@+id/navigation_weather"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.WeatherFragment"
+        android:label="Погода"
+        tools:layout="@layout/fragment_weather" />
+
+    <!-- Котики -->
+    <fragment
+        android:id="@+id/navigation_cats"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.CatsFragment"
+        android:label="Котики"
+        tools:layout="@layout/fragment_cats" />
+
+    <!-- Книги -->
+    <fragment
+        android:id="@+id/navigation_books"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.MyLibraryFragment"
+        android:label="Моя библиотека"
+        tools:layout="@layout/fragment_my_library" />
+
+    <!-- Дела -->
+    <fragment
+        android:id="@+id/navigation_todo"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.TodoFragment"
+        android:label="Список дел"
+        tools:layout="@layout/fragment_todo" />
+
+    <!-- Страны -->
+    <fragment
+        android:id="@+id/navigation_countries"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.CountriesFragment"
+        android:label="Страны"
+        tools:layout="@layout/fragment_countries" />
+
+    <!-- Прогрессия -->
+    <fragment
+        android:id="@+id/navigation_scrollview"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.ScrollViewFragment"
+        android:label="Прогрессия"
+        tools:layout="@layout/fragment_scroll_view" />
+
+    <!-- Авторы -->
+    <fragment
+        android:id="@+id/navigation_listview"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.ListViewFragment"
+        android:label="Авторы"
+        tools:layout="@layout/fragment_list_view" />
+
+    <!-- Экран деталей котика -->
+    <fragment
+        android:id="@+id/catDetailFragment"
+        android:name="ru.mirea.tenyutinmm.lesson9.presentation.CatDetailFragment"
+        android:label="Анализ котика"
+        tools:layout="@layout/activity_cat_detail" />
+
+</navigation>
+```
+<img width="708" height="1240" alt="image" src="https://github.com/user-attachments/assets/bc35e100-246a-4ef7-ba1a-33742bb2d817" />
+<img width="692" height="1213" alt="image" src="https://github.com/user-attachments/assets/285ea49f-dec7-464b-9ad3-c1d0b8fba064" />
+
+В макете activity_main.xml старый контейнер FrameLayout был заменен на NavHostFragment (класс androidx.fragment.app.FragmentContainerView), который служит хостом для отображения фрагментов из графа навигации.
+
+**3. Navigation Drawer (Боковое меню)**
+
+Для реализации удобной навигации по большому количеству разделов было выбрано боковое меню (Navigation Drawer).
+В файле activity_main.xml корневым элементом стал DrawerLayout, содержащий основной контент и NavigationView (само меню).
+В файле меню drawer_view.xml были определены пункты навигации, сгруппированные логически. Также была добавлена кнопка "Войти", видимая только для гостевого режима.
+
+<img width="860" height="1313" alt="image" src="https://github.com/user-attachments/assets/3276d7bc-7c0a-45b7-987e-cf904ad17ce8" />
+
+<img width="712" height="1252" alt="image" src="https://github.com/user-attachments/assets/479c65ed-64ca-4663-b1ff-551aa6fcae1e" />
+
+В классе MainActivity была полностью переписана логика навигации. Ручное управление транзакциями (beginTransaction) было заменено на использование NavController и NavigationUI. Это позволило:
+
+1.Автоматически связывать нажатия в меню с переходами по фрагментам.
+2.Автоматически управлять кнопкой "Гамбургер" / "Назад" в Toolbar.
+3.Автоматически обновлять заголовок Toolbar в зависимости от открытого фрагмента (по атрибуту android:label в графе).
+
+**Листинг 3: presentation/MainActivity.java**
 ```
 package ru.mirea.tenyutinmm.lesson9.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import com.bumptech.glide.Glide;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import ru.mirea.tenyutinmm.lesson9.R;
+import ru.mirea.tenyutinmm.lesson9.databinding.ActivityMainBinding;
 
+public class MainActivity extends AppCompatActivity {
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public boolean isGuest;
     private SharedViewModel sharedViewModel;
-    private DrawerLayout drawerLayout;
+    private AppBarConfiguration mAppBarConfiguration;
+    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        // 2. Настройка Toolbar
+        setSupportActionBar(binding.toolbar);
 
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
         isGuest = getIntent().getBooleanExtra("IS_GUEST", true);
@@ -70,28 +221,58 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             sharedViewModel.setUser(FirebaseAuth.getInstance().getCurrentUser());
         }
 
-        updateNavHeader(navigationView);
+        updateNavHeader();
+
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+
+        NavController navController = navHostFragment.getNavController();
+
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.navigation_profile,
+                R.id.navigation_weather,
+                R.id.navigation_cats,
+                R.id.navigation_books,
+                R.id.navigation_todo,
+                R.id.navigation_countries,
+                R.id.navigation_scrollview,
+                R.id.navigation_listview)
+                .setOpenableLayout(binding.drawerLayout)
+                .build();
+
+        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+
+        NavigationUI.setupWithNavController(binding.navView, navController);
 
         if (isGuest) {
-            navigationView.getMenu().findItem(R.id.navigation_books).setVisible(false);
-            navigationView.getMenu().findItem(R.id.navigation_profile).setVisible(false);
+            binding.navView.getMenu().findItem(R.id.navigation_books).setVisible(false);
+            binding.navView.getMenu().findItem(R.id.navigation_profile).setVisible(false);
+
+            if (savedInstanceState == null) {
+
+                navController.navigate(R.id.navigation_weather);
+            }
         } else {
-            navigationView.getMenu().findItem(R.id.navigation_login).setVisible(false);
+            binding.navView.getMenu().findItem(R.id.navigation_login).setVisible(false);
         }
 
-        if (savedInstanceState == null) {
-            if (isGuest) {
-                navigateToFragment(new WeatherFragment(), false);
-                navigationView.setCheckedItem(R.id.navigation_weather);
-            } else {
-                navigateToFragment(new ProfileFragment(), false);
-                navigationView.setCheckedItem(R.id.navigation_profile);
+        binding.navView.setNavigationItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.navigation_login) {
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                return true;
             }
-        }
+            boolean handled = NavigationUI.onNavDestinationSelected(item, navController);
+            if (handled) {
+                binding.drawerLayout.closeDrawer(GravityCompat.START);
+            }
+            return handled;
+        });
     }
 
-    private void updateNavHeader(NavigationView navigationView) {
-        View headerView = navigationView.getHeaderView(0);
+    private void updateNavHeader() {
+        View headerView = binding.navView.getHeaderView(0);
         TextView tvHeaderEmail = headerView.findViewById(R.id.tv_header_email);
         ImageView ivHeaderAvatar = headerView.findViewById(R.id.iv_header_avatar);
 
@@ -108,119 +289,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Fragment selectedFragment = null;
-        int itemId = item.getItemId();
-
-        if (itemId == R.id.navigation_login) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            return true;
-        }
-
-        if (itemId == R.id.navigation_profile) {
-            selectedFragment = new ProfileFragment();
-        } else if (itemId == R.id.navigation_weather) {
-            selectedFragment = new WeatherFragment();
-        } else if (itemId == R.id.navigation_cats) {
-            selectedFragment = new CatsFragment();
-        }
-        else if (itemId == R.id.navigation_books) {
-            selectedFragment = new MyLibraryFragment();
-        }
-        else if (itemId == R.id.navigation_todo) {
-            selectedFragment = new TodoFragment();
-        } else if (itemId == R.id.navigation_countries) {
-            selectedFragment = new CountriesFragment();
-        } else if (itemId == R.id.navigation_scrollview) {
-            selectedFragment = new ScrollViewFragment();
-        } else if (itemId == R.id.navigation_listview) {
-            selectedFragment = new ListViewFragment();
-        }
-
-        if (selectedFragment != null) {
-            navigateToFragment(selectedFragment, true);
-        }
-
-        drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    private void navigateToFragment(Fragment fragment, boolean addToBackStack) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment);
-
-        if (addToBackStack) {
-            transaction.addToBackStack(null);
-        }
-        transaction.commit();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
-        } else {
-            super.onBackPressed();
-        }
+    public boolean onSupportNavigateUp() {
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+        NavController navController = navHostFragment.getNavController();
+        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                || super.onSupportNavigateUp();
     }
 }
 ```
-**2. Взаимодействие между Фрагментами**
+**4. Контрольное задание: Интеграция детального экрана**
+В рамках контрольного задания требовалось полностью перевести навигацию на Navigation Component. Для этого экран детального просмотра котика (CatDetailActivity), который ранее был отдельной активностью, был преобразован во фрагмент CatDetailFragment.
 
-В рамках практической работы было реализовано несколько заданий по обмену данными между фрагментами. Этот функционал был объединен на вкладке "Страны".
+1.Создан класс CatDetailFragment с логикой отображения и ML-анализа.
+2.Фрагмент добавлен в граф навигации mobile_navigation.xml.
+3.В CatsFragment переход осуществляется через NavController.navigate() с передачей аргументов (URL картинки) через Bundle.
 
-Экран "Страны" представляет собой мастер-детальный интерфейс, реализованный с помощью трех фрагментов:
-•	CountriesFragment: Родительский фрагмент-контейнер.
-•	CountriesListFragment: Дочерний фрагмент, отображающий список стран (ListView).
-•	CountryDetailFragment: Дочерний фрагмент, отображающий детальную информацию.
-<img width="974" height="596" alt="image" src="https://github.com/user-attachments/assets/6f011aa4-8948-4f51-8333-34deee2f1b23" />
+Это позволило сохранить целостность навигации: при открытии деталей котика MainActivity остается активной, а в Toolbar автоматически появляется кнопка "Назад", возвращающая к списку.
 
-**Передача данных через Bundle**
+**Скриншот с данной кнопкой назад представлен выше в отчете!**
 
-Задание: "Передайте во фрагмент свой номер по списку."
-При создании дочерних фрагментов в CountriesFragment создается Bundle, в который помещается номер по списку (24). Этот Bundle передается в CountriesListFragment. В onViewCreated фрагмент-получатель извлекает этот номер и выводит его в Logcat, подтверждая успешную передачу данных.
-<img width="974" height="590" alt="image" src="https://github.com/user-attachments/assets/d39a7279-4fbd-48a7-9beb-45c16f3274e2" />
-
-**Взаимодействие через SharedViewModel**
-
-Задание: "При выборе пункта, должно производится обновление содержимого экрана в DetailsFragment."
-Для передачи информации о выбранной стране из CountriesListFragment в CountryDetailFragment используется общая CountriesSharedViewModel, привязанная к Activity.
-1.	CountriesListFragment при клике на элемент списка вызывает метод sharedViewModel.selectCountry(country).
-2.	CountryDetailFragment подписывается на LiveData в этой ViewModel и автоматически обновляет свой UI (название, столицу, флаг), как только LiveData получает новые данные.
-Это обеспечивает надежное и реактивное взаимодействие между фрагментами без прямых ссылок друг на друга.
-
-**Взаимодействие через Fragment Result API**
-
-Задание: "Реализовать передачу данных из одного фрагмента в другой с помощью FragmentResultApi."
-На экране CountryDetailFragment есть кнопка "Добавить заметку", которая открывает NoteBottomSheetFragment.
-1.	CountryDetailFragment устанавливает слушатель setFragmentResultListener с ключом noteRequestKey.
-2.	NoteBottomSheetFragment (отправитель) содержит EditText и кнопку. При нажатии на кнопку он упаковывает введенный текст в Bundle и отправляет его с помощью setFragmentResult, используя тот же ключ noteRequestKey.
-3.	CountryDetailFragment (получатель) немедленно получает результат и обновляет TextView с текстом заметки.
-<img width="974" height="595" alt="image" src="https://github.com/user-attachments/assets/e263b6a8-229c-4435-9ff8-b982a5cf028e" />
-<img width="974" height="601" alt="image" src="https://github.com/user-attachments/assets/de609622-5b0c-46a6-a88c-fa57afb211d1" />
-
-**3. Контрольное задание**
-
-Контрольное задание требовало реализовать отображение списка с использованием ViewModel и нескольких фрагментов, а также добавить фрагмент "Профиль".
-
-Эта задача была полностью выполнена в рамках нашего приложения:
-Отображение списка с ViewModel и фрагментами: Все экраны со списками ("Котики", "Книги", "Дела") реализованы с помощью RecyclerView, Adapter, ViewModel и Fragment.
-
-Фрагмент "Профиль": Создан ProfileFragment, который виден только авторизованным пользователям. Он получает данные о текущем пользователе из Firebase.auth.FirebaseAuth через SharedViewModel и отображает их (Email, UID, аватар).
-
-Навигация и бэк-стек: Вся навигация в приложении построена на фрагментах с корректным использованием бэк-стека, что обеспечивает плавные переходы и ожидаемое поведение кнопки "назад".
-
-**Листинг 1: presentation/ProfileFragment.java**
-
-Фрагмент "Профиль". Он получает общую SharedViewModel, подписывается на LiveData с данными о пользователе и отображает их. Логика выхода из аккаунта также инкапсулирована здесь.
+**Листинг 4: presentation/CatDetailFragment.java**
 ```
 package ru.mirea.tenyutinmm.lesson9.presentation;
 
-import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -228,92 +322,83 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
+
 import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseAuth;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
+
 import ru.mirea.tenyutinmm.lesson9.R;
 
-public class ProfileFragment extends Fragment {
+public class CatDetailFragment extends Fragment {
 
-    private SharedViewModel sharedViewModel;
-    private TextView emailTextView;
-    private TextView uidTextView;
-    private Button logoutButton;
-    private ImageView avatarImageView;
+    private ImageView catImageView;
+    private Button analyzeButton;
+    private TextView resultTextView;
+
+    private ImageClassifier imageClassifier;
+    private Bitmap imageBitmap;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        return inflater.inflate(R.layout.activity_cat_detail, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+        catImageView = view.findViewById(R.id.iv_cat_detail);
+        analyzeButton = view.findViewById(R.id.btn_analyze);
+        resultTextView = view.findViewById(R.id.tv_result);
 
-        emailTextView = view.findViewById(R.id.tv_user_email);
-        uidTextView = view.findViewById(R.id.tv_user_uid);
-        logoutButton = view.findViewById(R.id.btn_logout);
-        avatarImageView = view.findViewById(R.id.iv_avatar);
+        imageClassifier = new ImageClassifier(requireContext());
+        imageClassifier.initialize();
 
-        sharedViewModel.getUser().observe(getViewLifecycleOwner(), firebaseUser -> {
-            if (firebaseUser != null) {
-                emailTextView.setText(firebaseUser.getEmail());
-                uidTextView.setText("UID: " + firebaseUser.getUid());
+        String catUrl = null;
+        if (getArguments() != null) {
+            catUrl = getArguments().getString("cat_url");
+        }
 
-                String avatarUrl = "https://i.pravatar.cc/300?u=" + firebaseUser.getUid();
-                Glide.with(this)
-                        .load(avatarUrl)
-                        .into(avatarImageView);
+        if (catUrl != null) {
+            Glide.with(this)
+                    .asBitmap()
+                    .load(catUrl)
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            imageBitmap = resource;
+                            catImageView.setImageBitmap(resource);
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                        }
+                    });
+        }
+
+        analyzeButton.setOnClickListener(v -> {
+            if (imageBitmap != null) {
+                new Thread(() -> {
+                    final String result = imageClassifier.classify(imageBitmap);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> resultTextView.setText("Результат: " + result));
+                    }
+                }).start();
+            } else {
+                Toast.makeText(getContext(), "Изображение еще не загружено", Toast.LENGTH_SHORT).show();
             }
         });
-
-        logoutButton.setOnClickListener(v -> logout());
-    }
-
-    private void logout() {
-        FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(getActivity(), LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
     }
 }
 ```
+В результате выполнения работы приложение приобрело законченную, профессиональную архитектуру. Использование Navigation Component и Navigation Drawer обеспечило удобную и стандартизированную навигацию, а View Binding повысил надежность кода.
 
-**Листинг 2: presentation/SharedViewModel.java**
-
-Пример общей ViewModel, которая используется для обмена данными между MainActivity и ProfileFragment.
-```
-package ru.mirea.tenyutinmm.lesson9.presentation;
-
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-
-import com.google.firebase.auth.FirebaseUser;
-
-public class SharedViewModel extends ViewModel {
-
-    private final MutableLiveData<FirebaseUser> user = new MutableLiveData<>();
-
-    public void setUser(FirebaseUser firebaseUser) {
-        user.setValue(firebaseUser);
-    }
-
-    public LiveData<FirebaseUser> getUser() {
-        return user;
-    }
-}
-```
-
-В результате выполнения данной практической работы были освоены и применены все ключевые аспекты работы с фрагментами в Android, включая их жизненный цикл, управление транзакциями и современные подходы к межфрагментному взаимодействию.
-
-Работу выполнил Тенютин М.М БСБО-09-22
 
 
 
